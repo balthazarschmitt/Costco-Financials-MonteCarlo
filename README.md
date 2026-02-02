@@ -65,8 +65,6 @@ The model's bearish signal warrants investigation into several potential explana
 3. **Growth Expectations**: 6% near-term growth may be conservative for a retailer successfully expanding internationally
 4. **Base Revenue**: Verify the starting revenue figure aligns with Costco's most recent fiscal year (~$254B FY2024)
 
-Financial models are tools for thinking, not crystal balls. This distribution should inform further research, not dictate decisions.
-
 ## License
 
 CC0 1.0 Universal
