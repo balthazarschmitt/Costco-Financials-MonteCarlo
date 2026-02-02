@@ -105,10 +105,13 @@ ticker = yf.Ticker("COST")
 hist = ticker.history(period="1d")
 current_price = hist['Close'].iloc[-1]
 
+# Report Title
 print("Monte Carlo Simulation Result:\n")
 
+# Main Statistics
 print("KEY INSIGHTS:\n")
 
+# Value per share by percentile
 print("Value per share (USD):")
 print("5th Percentile:    ", np.percentile(value_per_share, 5).round(2))
 print("25th Percentile:   ", np.percentile(value_per_share, 25).round(2))
@@ -116,6 +119,7 @@ print("50th Percentile:   ", np.percentile(value_per_share, 50).round(2))
 print("75th Percentile:   ", np.percentile(value_per_share, 75).round(2))
 print("95th Percentile:   ", np.percentile(value_per_share, 95).round(2))
 
+# Summary statistics
 print("\nKey Statistics:")
 print("Mean:              ", np.mean(value_per_share).round(2))
 print("Standard Deviation:", np.std(value_per_share).round(2))
@@ -124,8 +128,10 @@ print("IQR:               ", (np.percentile(value_per_share, 75) - np.percentile
 print("Minimum:           ", np.min(value_per_share).round(2))
 print("Maximum:           ", np.max(value_per_share).round(2))
 
+# Additional Insights
 print("\nOTHER INSIGHTS:\n")
 
+# Return potential compared to current price of each percentile
 print("Return Potential (%):")
 print("5th Percentile:    ", ((np.percentile(value_per_share, 5).round(2) / current_price - 1)*100).round(2), "%")
 print("25th Percentile:   ", ((np.percentile(value_per_share, 25).round(2) / current_price - 1)*100).round(2), "%")
@@ -133,11 +139,14 @@ print("50th Percentile:   ", ((np.percentile(value_per_share, 50).round(2) / cur
 print("75th Percentile:   ", ((np.percentile(value_per_share, 75).round(2) / current_price - 1)*100).round(2), "%")
 print("95th Percentile:   ", ((np.percentile(value_per_share, 95).round(2) / current_price - 1)*100).round(2), "%")
 
+# Percent and count of simulations above/below current price
 print("\nPercent of Simulations Above Current Price:")
 
+# Calculate percentage and count of simulations above/below current price
 above = value_per_share > current_price
 pct_above = np.mean(above) * 100
 pct_below = 100 - pct_above   
+# Print results
 print(f"Above:              {pct_above:.2f}%       ({np.count_nonzero(above)}/{N}) simulations")
 print(f"Below:              {pct_below:.2f}%      ({N - np.count_nonzero(above)}/{N}) simulations")
 
