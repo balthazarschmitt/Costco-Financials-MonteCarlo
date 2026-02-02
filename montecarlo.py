@@ -23,55 +23,61 @@ growth_1_5 = np.random.normal(0.06, 0.015, N)
 growth_6_10 = np.random.normal(0.04, 0.01, N)
 ebit_margin = np.random.normal(0.037, 0.003, N)
 
+# % of revenue
+dep_pct = np.random.normal(0.009, 0.005, N) # Depreciation
+capex_pct = np.random.normal(0.019, 0.007, N) # CapEx
+delta_nwc_pct = np.random.normal(0.002, 0.0007, N) # NWC
+
 # Generate random variables for wacc and tgr as a Normal and Triangular distribution respectively
 wacc = np.random.normal(0.0734, 0.005, N)
 tgr = np.random.triangular(0.025, 0.03, 0.035, N)
+
+# Clamp depreciation, capex, and nwc percentages to within reasonable bounds
+dep_pct = np.clip(dep_pct, 0.0, 0.10)
+capex_pct = np.clip(capex_pct, 0.0, 0.15)
+delta_nwc_pct = np.clip(delta_nwc_pct, 0.0, 0.01)
 
 # Clamp wacc and tgr to within reasonable bounds
 wacc = np.clip(wacc, 0.05, 0.12)
 tgr = np.clip(tgr, 0.0, 0.04)
 
 # Define main DCF function that runs within each simulation
-def dcf_value(revenue_0, g1, g2, margin, tax_rate, wacc, tgr):
-    # Create empty list for projected revenues
+def dcf_value(revenue_0, g1, g2, margin, tax_rate, wacc, tgr, dep_ratio, capex_ratio, nwc_ratio):
+    # Project revenues (10 years)
     revenues = []
-    # Create temp variable for current rev in each year starting at the initial rev
     revenue = revenue_0
-    
-    # Loop through the 10 forcasted years
     for t in range(1, 11):
-        # Use growth rate 1 or 2 based on year (first 1-5 vs 6-10)
         g = g1 if t <= 5 else g2
-        # Update rev for the current year using the define growth rate
         revenue *= (1 + g)
-        # Add the each individual growth rate to the rev list
         revenues.append(revenue)
-        
-    # Calculate EBIT for each year based off of the projected revenues and the ebit margin defined before
-    ebit = np.array(revenues) * margin
-    
-    # Calculate NOPAT by removing taxes from EBIT
+
+    rev = np.array(revenues)
+
+    # EBIT and NOPAT
+    ebit = rev * margin
     nopat = ebit * (1 - tax_rate)
+
+    # D&A, CapEx, NWC levels per year (use scalar ratios for this simulation)
+    dep = rev * dep_ratio
+    capex = rev * capex_ratio
+    delta_nwc = rev * nwc_ratio
+
+    # FCFF per year
+    fcff = nopat + dep - capex - delta_nwc
     
-    # Approximate FCFF as NOPAT (ignoring changes in working capital and capex for simplicity)
-    fcff = nopat
-    
-    # Calculate the discount factors for each year
-    discount_factors = np.array([(1 + wacc)**t for t in range(1, 11)])
-    # Calculate PV of FCFFs using the discount factors
+    # Cap FCFF to be non-negative
+    fcff[-1] = max(fcff[-1], 0)
+
+    # Discount and terminal value
+    discount_factors = np.array([(1 + wacc) ** t for t in range(1, 11)])
     pv_fcff = np.sum(fcff / discount_factors)
-    
-    # Calculate terminal value using the Gordon Growth Model
-    terminal_value = fcff[-1] * (1 + tgr) / (wacc - tgr)
-    # Calculate PV of terminal value
+
+    denom = max(wacc - tgr, 1e-6)  # guard against wacc <= tgr
+    terminal_value = fcff[-1] * (1 + tgr) / denom
     pv_terminal = terminal_value / ((1 + wacc) ** 10)
-    
-    # Calculate total enterprise value
+
     enterprise_value = pv_fcff + pv_terminal
-    # Calculate total equity value by subtracting net debt from enterprise value
     equity_value = enterprise_value - net_debt + base_cash
-    
-    # Return the calculated total equity value
     return equity_value
 
 # Run the monte carlo simulation using the defined DCF function above N times
@@ -83,7 +89,10 @@ equity_values = np.array([
         ebit_margin[i],
         tax_rate,
         wacc[i],
-        tgr[i]
+        tgr[i],
+        dep_pct[i],      # pass scalar ratios for this simulation
+        capex_pct[i],
+        delta_nwc_pct[i]
     )
     for i in range(N)
 ])
