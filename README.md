@@ -65,6 +65,12 @@ The model's bearish signal warrants investigation into several potential explana
 3. **Growth Expectations**: 6% near-term growth may be conservative for a retailer successfully expanding internationally
 4. **Base Revenue**: Verify the starting revenue figure aligns with Costco's most recent fiscal year (~$254B FY2024)
 
+## Visualization
+
+The script generates a histogram showing the distribution of simulated valuations with the current market price overlaid as a vertical red line. This visual makes the valuation gap immediately apparent.
+
+![Monte Carlo Distribution](assets/Costco_MonteCarlo.png)
+
 ## License
 
 CC0 1.0 Universal
